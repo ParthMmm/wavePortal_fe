@@ -16,7 +16,7 @@ function Landing() {
   const [currAccount, setCurrentAccount] = useState("");
   const [allWaves, setAllWaves] = useState([]);
 
-  const contractAddress = "0xce86CC73cd607a4F7Fb0946f57a424c0932e1cb9";
+  const contractAddress = "0xFb22FD9967A1079667c15FAC0a3e00F453FC25a8";
   const contractABI = abi.abi;
   const checkIfWalletIsConnected = () => {
     const { ethereum } = window;
