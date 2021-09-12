@@ -134,6 +134,10 @@ function Landing() {
 
   useEffect(() => {
     checkIfWalletIsConnected();
+
+    if (currAccount) {
+      getAllWaves();
+    }
   }, []);
   return (
     <>
