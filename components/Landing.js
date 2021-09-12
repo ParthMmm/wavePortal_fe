@@ -9,14 +9,26 @@ import {
   Link,
   Button,
   Stack,
+  Input,
+  Spacer,
+  FormControl,
+  Spinner,
+  VStack,
 } from "@chakra-ui/react";
 import Header from "./Header";
 import abi from "../utils/WavePortal.json";
+import Waves from "./Waves";
+import Toast from "./Toast";
+
 function Landing() {
   const [currAccount, setCurrentAccount] = useState("");
   const [allWaves, setAllWaves] = useState([]);
+  const [value, setValue] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMessage] = useState("");
 
-  const contractAddress = "0xFb22FD9967A1079667c15FAC0a3e00F453FC25a8";
+  const handleChange = (event) => setValue(event.target.value);
+  const contractAddress = "0x51759C31c8acB4Db8b2eEB8091D26e85ba4F0FBd";
   const contractABI = abi.abi;
   const checkIfWalletIsConnected = () => {
     const { ethereum } = window;
@@ -32,6 +44,7 @@ function Landing() {
         const account = accounts[0];
         console.log("Found an authorized account: ", account);
         setCurrentAccount(account);
+        getAllWaves();
       } else {
         console.log("No authorized account found");
       }
@@ -65,13 +78,21 @@ function Landing() {
     let count = await waveportalContract.getTotalWaves();
     console.log("Total wave count...", count.toNumber());
 
-    const waveTxn = await waveportalContract.wave("this is a message");
+    const waveTxn = await waveportalContract.wave(value, {
+      gasLimit: 300000,
+    });
     console.log("Mining...", waveTxn.hash);
+    setLoading(true);
+    setMessage("Mining...");
     await waveTxn.wait();
     console.log("Mined --", waveTxn.hash);
+    setMessage("Successfully Mined!");
 
     count = await waveportalContract.getTotalWaves();
     console.log("Total wave count...", count.toNumber());
+
+    getAllWaves();
+    setLoading(false);
   };
 
   async function getAllWaves() {
@@ -87,22 +108,31 @@ function Landing() {
 
     let wavesCleaned = [];
     waves.forEach((wave) => {
+      console.log("wave", wave);
       wavesCleaned.push({
         address: wave.waver,
         timestamp: new Date(wave.timestamp * 1000),
         message: wave.message,
       });
     });
-
+    console.log("cleaned", wavesCleaned);
     setAllWaves(wavesCleaned);
-    console.log(allWaves);
+
+    waveportalContract.on("NewWave", (from, timestamp, message) => {
+      console.log("NewWave", from, timestamp, message);
+      setAllWaves((wavesCleaned) => [
+        ...wavesCleaned,
+        {
+          address: from,
+          timestamp: new Date(timestamp * 100),
+          message: message,
+        },
+      ]);
+    });
   }
 
   useEffect(() => {
     checkIfWalletIsConnected();
-    if (currAccount) {
-      getAllWaves();
-    }
   }, []);
   return (
     <>
@@ -114,65 +144,68 @@ function Landing() {
         px={10}
         py={5}
       >
-        <Button _hover={{ bg: "orange" }} onClick={connectWallet}>
-          connect wallet
-        </Button>
-      </Flex>
-      <Box>
-        <Center
-          d="flex"
-          mx="auto"
-          justifyContent="center"
-          alignItems="center"
-          flexDir="column"
-          h="60vh"
-        >
-          <Heading mb={2}>Welcome 👋</Heading>
-          <Text mb={2}>
-            {" "}
-            Being built by <Link href="https://parthm.dev">Parth M.</Link>
-          </Text>
-          <Button mt={2} colorScheme="green" onClick={wave}>
-            wave at me
+        {currAccount ? (
+          <Button _hover={{ bg: "orange.500" }}>
+            <Text isTruncated>{currAccount}</Text>
           </Button>
-        </Center>
-      </Box>
-      <Center>
-        <Box mt={1} rounded="xl" boxShadow="lg" p={5} mb={5} w="80%">
-          <Stack spacing={5}>
-            <Box
-              d="flex"
-              alignItems="baseline"
-              flexDir="row"
-              justifyContent="space-between"
-              _hover={{ bg: "tomato" }}
-              rounded="xl"
-              p={2}
+        ) : (
+          <Button _hover={{ bg: "orange.500" }} onClick={connectWallet}>
+            connect wallet
+          </Button>
+        )}
+      </Flex>
+      <Center
+        d="flex"
+        mx="auto"
+        justifyContent="center"
+        alignItems="center"
+        flexDir="column"
+        h="50vh"
+      >
+        {" "}
+        <Heading mb={2} _hover={{ color: "orange.500" }}>
+          Welcome 👋
+        </Heading>
+        <Text mb={10}>
+          {" "}
+          Being built by{" "}
+          <Link href="https://parthm.dev" _hover={{ color: "orange.500" }}>
+            Parth M.
+          </Link>
+        </Text>
+        {loading ? (
+          <Center mt={64}>
+            <VStack>
+              <Spinner color="green.500" mb={2} />
+              <Heading>{msg}</Heading>
+            </VStack>
+          </Center>
+        ) : (
+          <>
+            <Input
+              mt={64}
+              w="25%"
+              rounded="lg"
+              focusBorderColor="green.500"
+              placeholder="Add a message"
+              value={value}
+              onChange={handleChange}
+            ></Input>
+            <Button
+              mt={4}
+              bg="green.600"
+              onClick={wave}
+              rounded="lg"
+              disabled={!currAccount}
             >
-              <Text as="span">Address</Text>
-              <Text as="span">Time</Text>
-              <Text as="span">Message</Text>
-            </Box>
-            {allWaves.map((wave, index) => {
-              return (
-                <Box
-                  d="flex"
-                  alignItems="baseline"
-                  flexDir="row"
-                  justifyContent="space-between"
-                  _hover={{ bg: "tomato" }}
-                  rounded="xl"
-                  p={2}
-                >
-                  <Text as="span">{wave.address}</Text>
-                  <Text as="span">{wave.timestamp.toString()}</Text>
-                  <Text as="span">{wave.message}</Text>
-                </Box>
-              );
-            })}
-          </Stack>
-        </Box>
+              wave at me
+            </Button>
+          </>
+        )}
       </Center>
+      <Box mt={12}>
+        <Waves allWaves={allWaves} />
+      </Box>
     </>
   );
 }
