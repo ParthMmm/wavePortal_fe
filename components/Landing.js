@@ -23,7 +23,7 @@ function Landing() {
   const [msg, setMessage] = useState("");
 
   const handleChange = (event) => setValue(event.target.value);
-  const contractAddress = "0x51759C31c8acB4Db8b2eEB8091D26e85ba4F0FBd";
+  const contractAddress = "0xF05fab7E54F9FFfAe07EEbB64911F6Eaa0Ac735d";
   const contractABI = abi.abi;
   const checkIfWalletIsConnected = () => {
     const { ethereum } = window;
