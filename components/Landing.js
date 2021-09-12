@@ -8,17 +8,12 @@ import {
   Heading,
   Link,
   Button,
-  Stack,
   Input,
-  Spacer,
-  FormControl,
   Spinner,
   VStack,
 } from "@chakra-ui/react";
-import Header from "./Header";
 import abi from "../utils/WavePortal.json";
 import Waves from "./Waves";
-import Toast from "./Toast";
 
 function Landing() {
   const [currAccount, setCurrentAccount] = useState("");
@@ -74,22 +69,28 @@ function Landing() {
       contractABI,
       signer
     );
+    let msg;
+    if (value === "") {
+      msg = "👋";
+    } else {
+      msg = value;
+    }
 
     let count = await waveportalContract.getTotalWaves();
-    console.log("Total wave count...", count.toNumber());
+    // console.log("Total wave count...", count.toNumber());
 
-    const waveTxn = await waveportalContract.wave(value, {
+    const waveTxn = await waveportalContract.wave(msg, {
       gasLimit: 300000,
     });
-    console.log("Mining...", waveTxn.hash);
+    // console.log("Mining...", waveTxn.hash);
     setLoading(true);
-    setMessage("Mining...");
+    setMessage("Mining... ⛏️");
     await waveTxn.wait();
-    console.log("Mined --", waveTxn.hash);
-    setMessage("Successfully Mined!");
+    // console.log("Mined --", waveTxn.hash);
+    setMessage("Successfully Mined! 🎉");
 
     count = await waveportalContract.getTotalWaves();
-    console.log("Total wave count...", count.toNumber());
+    // console.log("Total wave count...", count.toNumber());
 
     getAllWaves();
     setLoading(false);
@@ -108,18 +109,18 @@ function Landing() {
 
     let wavesCleaned = [];
     waves.forEach((wave) => {
-      console.log("wave", wave);
+      // console.log("wave", wave);
       wavesCleaned.push({
         address: wave.waver,
         timestamp: new Date(wave.timestamp * 1000),
         message: wave.message,
       });
     });
-    console.log("cleaned", wavesCleaned);
-    setAllWaves(wavesCleaned);
+    // console.log("cleaned", wavesCleaned);
+    setAllWaves(wavesCleaned.reverse());
 
     waveportalContract.on("NewWave", (from, timestamp, message) => {
-      console.log("NewWave", from, timestamp, message);
+      // console.log("NewWave", from, timestamp, message);
       setAllWaves((wavesCleaned) => [
         ...wavesCleaned,
         {
@@ -133,6 +134,8 @@ function Landing() {
 
   useEffect(() => {
     checkIfWalletIsConnected();
+
+    console.log(allWaves.reverse());
   }, []);
   return (
     <>
@@ -146,11 +149,11 @@ function Landing() {
       >
         {currAccount ? (
           <Button _hover={{ bg: "orange.500" }}>
-            <Text isTruncated>{currAccount}</Text>
+            <Text isTruncated>😎 {currAccount}</Text>
           </Button>
         ) : (
           <Button _hover={{ bg: "orange.500" }} onClick={connectWallet}>
-            connect wallet
+            connect wallet 🏦
           </Button>
         )}
       </Flex>
@@ -197,6 +200,7 @@ function Landing() {
               onClick={wave}
               rounded="lg"
               disabled={!currAccount}
+              _hover={{ bg: "orange.500" }}
             >
               wave at me
             </Button>

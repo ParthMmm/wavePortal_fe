@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Center, Text, Stack, Input, FormControl } from "@chakra-ui/react";
+import { Box, Center, Text, Stack, Link, Heading } from "@chakra-ui/react";
 import Moment from "react-moment";
 import "moment-timezone";
 
@@ -17,10 +17,11 @@ function Waves({ allWaves }) {
               rounded="xl"
               p={2}
             >
-              <Text as="span">Message</Text>
+              <Heading color="green.600">messages ✉️</Heading>
+              {/* <Text as="span">Message</Text>
 
               <Text as="span">Address</Text>
-              <Text as="span">Time</Text>
+              <Text as="span">Time</Text> */}
             </Box>
             {allWaves.map((wave) => {
               return (
@@ -30,21 +31,33 @@ function Waves({ allWaves }) {
                   alignItems="baseline"
                   flexDir="row"
                   justifyContent="space-between"
-                  _hover={{ bg: "tomato" }}
                   rounded="xl"
                   p={2}
                   _hover={{ bg: "green.600" }}
                 >
-                  <Text>{wave.message}</Text>
-                  <Text>{wave.address}</Text>
-
-                  <Text>
-                    <Moment
-                      tz="America/Los_Angeles"
-                      format="hh:mm MM/DD/YYYY"
-                      date={wave.timestamp.toString()}
-                    ></Moment>
-                  </Text>
+                  <Box>
+                    <Heading _hover={{ color: "orange.400" }}>
+                      {wave.message}
+                    </Heading>
+                    <Text fontSize="sm">
+                      from{" "}
+                      <Link
+                        href={`https://etherscan.io/address/${wave.address}`}
+                        _hover={{ color: "orange.400" }}
+                      >
+                        {wave.address}
+                      </Link>
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text>
+                      <Moment
+                        tz="America/Los_Angeles"
+                        format="hh:mm MM/DD/YYYY"
+                        date={wave.timestamp.toString()}
+                      ></Moment>
+                    </Text>
+                  </Box>
                 </Box>
               );
             })}
