@@ -18,10 +18,6 @@ function Waves({ allWaves }) {
               p={2}
             >
               <Heading color="green.600">messages ✉️</Heading>
-              {/* <Text as="span">Message</Text>
-
-              <Text as="span">Address</Text>
-              <Text as="span">Time</Text> */}
             </Box>
             {allWaves.map((wave) => {
               return (

@@ -134,8 +134,6 @@ function Landing() {
 
   useEffect(() => {
     checkIfWalletIsConnected();
-
-    console.log(allWaves.reverse());
   }, []);
   return (
     <>
